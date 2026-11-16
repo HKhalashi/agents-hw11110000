@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Трекер учебных задач — v2 (по спецификации)</title>
+  <style>
+    :root {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #17233b; background: #f3f6fb; font-synthesis: none;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 30px 16px 48px; }
+    .shell { width: min(100%, 820px); margin: 0 auto; }
+    .topline { display:flex; align-items:center; gap:10px; margin-bottom:8px; color:#55709b; font-size:.78rem; font-weight:750; letter-spacing:.12em; text-transform:uppercase; }
+    .mark { width:9px; height:9px; border-radius:3px; background:#3667cf; }
+    h1 { font-size:clamp(1.75rem, 5vw, 2.45rem); letter-spacing:-.045em; margin:0; }
+    .subtitle { margin:8px 0 23px; color:#65738b; line-height:1.55; }
+    .summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:16px; }
+    .metric, .card { background:#fff; border:1px solid #e3e9f2; border-radius:16px; box-shadow:0 8px 26px rgba(27,48,86,.045); }
+    .metric { padding:16px 18px; }
+    .metric-label { display:block; color:#728098; font-size:.82rem; }
+    .metric-value { display:block; margin-top:7px; font-size:1.55rem; font-weight:760; letter-spacing:-.035em; }
+    .card { padding:21px; margin-top:15px; }
+    h2 { font-size:1.08rem; margin:0 0 16px; letter-spacing:-.015em; }
+    .entry-grid { display:grid; grid-template-columns:minmax(0,1fr) 150px auto; align-items:start; gap:12px; }
+    label { display:block; font-size:.88rem; font-weight:680; margin:0 0 7px; }
+    input[type="text"], input[type="number"] { width:100%; height:44px; border:1px solid #ccd6e5; border-radius:10px; padding:0 12px; background:#fff; color:#17233b; font:inherit; }
+    input:focus-visible, button:focus-visible { outline:3px solid #a9c4ff; outline-offset:2px; }
+    input[aria-invalid="true"] { border-color:#c43d4a; }
+    .field-error { min-height:1.25rem; margin:5px 0 0; color:#b42332; font-size:.8rem; }
+    button { min-height:42px; border:0; border-radius:10px; padding:9px 14px; font:inherit; font-weight:680; cursor:pointer; }
+    .primary { background:#2458bd; color:#fff; margin-top:25px; white-space:nowrap; }
+    .form-note { margin:7px 0 0; color:#748198; font-size:.8rem; }
+    .section-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:13px; }
+    .section-head h2 { margin:0; }
+    .count { color:#73819a; font-size:.82rem; }
+    .filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+    .filter { background:#edf2f9; color:#41516b; }
+    .filter[aria-pressed="true"] { color:#fff; background:#244f9d; }
+    .task-list { list-style:none; padding:0; margin:0; }
+    .task-row { display:grid; grid-template-columns:24px minmax(0,1fr) auto auto; align-items:center; gap:12px; min-height:61px; border-top:1px solid #edf1f6; }
+    .task-row:first-child { border-top:0; }
+    .task-check { width:19px; height:19px; accent-color:#2e61c5; margin:0; }
+    .task-name { min-width:0; overflow-wrap:anywhere; font-weight:620; }
+    .task-name.is-done { color:#8994a6; text-decoration:line-through; font-weight:500; }
+    .task-time { color:#687790; font-size:.88rem; white-space:nowrap; }
+    .remove { color:#a4313c; background:#fff0f1; padding:7px 10px; min-height:35px; font-size:.84rem; }
+    .empty { padding:24px 10px 12px; color:#718097; text-align:center; }
+    .footnote { color:#7a879b; font-size:.79rem; line-height:1.5; margin:17px 2px 0; }
+    @media (max-width:600px) {
+      body { padding:20px 12px 34px; }
+      .summary { gap:7px; }
+      .metric { padding:12px 9px; }
+      .metric-value { font-size:1.2rem; }
+      .metric-label { font-size:.73rem; }
+      .card { padding:16px 14px; }
+      .entry-grid { grid-template-columns:minmax(0,1fr) minmax(105px,.65fr); gap:8px 10px; }
+      .entry-grid .name-field { grid-column:1 / -1; }
+      .primary { grid-column:1 / -1; width:100%; margin-top:0; }
+      .task-row { grid-template-columns:22px minmax(0,1fr) auto; gap:8px; padding:9px 0; }
+      .task-time { grid-column:2; grid-row:2; }
+      .remove { grid-column:3; grid-row:1 / span 2; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="topline"><span class="mark" aria-hidden="true"></span> Учебная неделя</div>
+    <h1>Учебные задачи</h1>
+    <p class="subtitle">Планируемые часы и выполненная работа на одной странице.</p>
+
+    <section class="summary" aria-label="Task summary" aria-live="polite">
+      <div class="metric"><span class="metric-label">Всего запланировано</span><strong class="metric-value" id="metric-total">8 h</strong></div>
+      <div class="metric"><span class="metric-label">Выполнено часов</span><strong class="metric-value" id="metric-done">2 h</strong></div>
+      <div class="metric"><span class="metric-label">Прогресс</span><strong class="metric-value" id="metric-progress">25%</strong></div>
+    </section>
+
+    <section class="card" aria-labelledby="add-heading">
+      <h2 id="add-heading">Добавить учебную задачу</h2>
+      <form id="task-form" novalidate>
+        <div class="entry-grid">
+          <div class="name-field">
+            <label for="new-title">Название задачи</label>
+            <input id="new-title" name="title" type="text" placeholder="Чем вы будете заниматься?" autocomplete="off" aria-describedby="title-error">
+            <p class="field-error" id="title-error" aria-live="polite"></p>
+          </div>
+          <div>
+            <label for="new-hours">Оценка в часах</label>
+            <input id="new-hours" name="hours" type="number" min="0.5" max="24" step="0.5" placeholder="Например, 1.5" aria-describedby="hours-error">
+            <p class="field-error" id="hours-error" aria-live="polite"></p>
+          </div>
+          <button class="primary" type="submit">Добавить задачу</button>
+        </div>
+      </form>
+      <p class="form-note">От 0,5 до 24 часов с шагом 0,5.</p>
+    </section>
+
+    <section class="card" aria-labelledby="list-heading">
+      <div class="section-head">
+        <h2 id="list-heading">Задачи на неделю</h2>
+        <span class="count" id="task-count">3 tasks</span>
+      </div>
+      <div class="filters" role="group" aria-label="Show tasks">
+        <button type="button" class="filter" data-filter="all" aria-pressed="true">Все</button>
+        <button type="button" class="filter" data-filter="active" aria-pressed="false">Активные</button>
+        <button type="button" class="filter" data-filter="done" aria-pressed="false">Готовые</button>
+      </div>
+      <ul class="task-list" id="tasks"></ul>
+      <p class="empty" id="empty-message" hidden>Нет задач, соответствующих фильтру.</p>
+    </section>
+    <p class="footnote">Прогресс рассчитывается по часам. Фильтр меняет только список; сводные показатели учитывают все задачи.</p>
+  </main>
+
+<script>
+(() => {
+  'use strict';
+
+  // Domain rules from specification: keep validation and metrics explicit.
+  const INITIAL_TASKS = [
+    { id: 1, title: 'Чтение', hours: 2, done: true },
+    { id: 2, title: 'Практика', hours: 4, done: false },
+    { id: 3, title: 'Повторение', hours: 2, done: false }
+  ];
+
+  function validateTask(rawTitle, rawHours) {
+    const title = String(rawTitle ?? '').trim();
+    const hoursText = String(rawHours ?? '').trim();
+    if (title.length === 0) return { ok: false, field: 'title', message: 'Введите название задачи.' };
+    if (hoursText.length === 0) return { ok: false, field: 'hours', message: 'Введите количество часов.' };
+    const hours = Number(hoursText);
+    if (!Number.isFinite(hours) || hours < 0.5 || hours > 24 || !Number.isInteger(hours * 2)) {
+      return { ok: false, field: 'hours', message: 'Укажите от 0,5 до 24 часов с шагом 0,5.' };
+    }
+    return { ok: true, value: { title, hours } };
+  }
+
+  function calculateMetrics(allTasks) {
+    const totalHours = allTasks.reduce((sum, task) => sum + task.hours, 0);
+    const completedHours = allTasks.reduce((sum, task) => sum + (task.done ? task.hours : 0), 0);
+    const progress = totalHours === 0 ? 0 : Math.round((completedHours / totalHours) * 100);
+    return { totalHours, completedHours, progress };
+  }
+
+  function filterTasks(allTasks, filter) {
+    if (filter === 'active') return allTasks.filter(task => !task.done);
+    if (filter === 'done') return allTasks.filter(task => task.done);
+    return allTasks;
+  }
+
+  let tasks = INITIAL_TASKS.map(task => ({ ...task }));
+  let selectedFilter = 'all';
+  let nextId = 4;
+
+  const $ = id => document.getElementById(id);
+  const form = $('task-form');
+  const titleField = $('new-title');
+  const hoursField = $('new-hours');
+  const taskList = $('tasks');
+
+  function setError(field, message) {
+    const input = field === 'title' ? titleField : hoursField;
+    const error = field === 'title' ? $('title-error') : $('hours-error');
+    input.setAttribute('aria-invalid', 'true');
+    error.textContent = message;
+  }
+
+  function clearErrors() {
+    titleField.removeAttribute('aria-invalid');
+    hoursField.removeAttribute('aria-invalid');
+    $('title-error').textContent = '';
+    $('hours-error').textContent = '';
+  }
+
+  function renderSummary() {
+    const { totalHours, completedHours, progress } = calculateMetrics(tasks);
+    $('metric-total').textContent = `${totalHours} h`;
+    $('metric-done').textContent = `${completedHours} h`;
+    $('metric-progress').textContent = `${progress}%`;
+  }
+
+  function renderTasks() {
+    const visibleTasks = filterTasks(tasks, selectedFilter);
+    taskList.replaceChildren();
+    $('empty-message').hidden = visibleTasks.length > 0;
+    $('task-count').textContent = `Задач: ${tasks.length}`;
+
+    visibleTasks.forEach(task => {
+      const row = document.createElement('li');
+      row.className = 'task-row';
+
+      const checkbox = document.createElement('input');
+      checkbox.className = 'task-check';
+      checkbox.type = 'checkbox';
+      checkbox.checked = task.done;
+      checkbox.setAttribute('aria-label', `Отметить ${task.title} как ${task.done ? 'активную' : 'выполненную'}`);
+      checkbox.addEventListener('change', () => {
+        tasks = tasks.map(item => item.id === task.id ? { ...item, done: checkbox.checked } : item);
+        render();
+      });
+
+      const name = document.createElement('span');
+      name.className = `task-name${task.done ? ' is-done' : ''}`;
+      name.textContent = task.title;
+
+      const time = document.createElement('span');
+      time.className = 'task-time';
+      time.textContent = `${task.hours} h`;
+
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'remove';
+      deleteButton.type = 'button';
+      deleteButton.textContent = 'Удалить';
+      deleteButton.setAttribute('aria-label', `Удалить задачу: ${task.title}`);
+      deleteButton.addEventListener('click', () => {
+        tasks = tasks.filter(item => item.id !== task.id);
+        render();
+      });
+
+      row.append(checkbox, name, time, deleteButton);
+      taskList.append(row);
+    });
+
+    document.querySelectorAll('[data-filter]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.filter === selectedFilter));
+    });
+  }
+
+  function render() {
+    renderSummary();
+    renderTasks();
+  }
+
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    clearErrors();
+    const result = validateTask(titleField.value, hoursField.value);
+    if (!result.ok) {
+      setError(result.field, result.message);
+      return; // Leave user-entered values intact so they can correct them.
+    }
+    tasks = [...tasks, { id: nextId++, title: result.value.title, hours: result.value.hours, done: false }];
+    form.reset();
+    selectedFilter = 'all';
+    render();
+    titleField.focus();
+  });
+
+  document.querySelectorAll('[data-filter]').forEach(button => {
+    button.addEventListener('click', () => {
+      selectedFilter = button.dataset.filter;
+      renderTasks(); // Presentation changes; metrics remain based on all tasks.
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

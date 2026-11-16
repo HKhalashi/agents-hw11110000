@@ -1,0 +1,144 @@
+{
+  "v1": {
+    "checks": [
+      {
+        "name": "T1",
+        "passed": true,
+        "details": {
+          "task_count": 3,
+          "total": "8 h",
+          "completed": "2 h",
+          "progress": "25%"
+        }
+      },
+      {
+        "name": "T2",
+        "passed": true,
+        "details": {
+          "completed": "6 h",
+          "progress": "75%"
+        }
+      },
+      {
+        "name": "T3",
+        "passed": true,
+        "details": {
+          "visible_names": [
+            "\u041f\u0440\u0430\u043a\u0442\u0438\u043a\u0430",
+            "\u041f\u043e\u0432\u0442\u043e\u0440\u0435\u043d\u0438\u0435"
+          ],
+          "progress": "25%"
+        }
+      },
+      {
+        "name": "T4",
+        "passed": true,
+        "details": {
+          "blank_title_error": true,
+          "preserved_title": true,
+          "empty_hours_error": true,
+          "preserved_hours": true,
+          "negative_error": true,
+          "no_invalid_additions": true,
+          "0.5_accepted": true,
+          "0.7_rejected": true,
+          "24_accepted": true
+        }
+      },
+      {
+        "name": "T5",
+        "passed": true,
+        "details": {
+          "total": "0 h",
+          "completed": "0 h",
+          "progress": "0%",
+          "empty_visible": true
+        }
+      },
+      {
+        "name": "Responsive 390px",
+        "passed": true,
+        "details": {
+          "dimensions": {
+            "viewport": 390,
+            "scroll": 390,
+            "body": 390
+          },
+          "no_horizontal_overflow": true
+        }
+      }
+    ],
+    "page_errors": []
+  },
+  "v2": {
+    "checks": [
+      {
+        "name": "T1",
+        "passed": true,
+        "details": {
+          "task_count": 3,
+          "total": "8 h",
+          "completed": "2 h",
+          "progress": "25%"
+        }
+      },
+      {
+        "name": "T2",
+        "passed": true,
+        "details": {
+          "completed": "6 h",
+          "progress": "75%"
+        }
+      },
+      {
+        "name": "T3",
+        "passed": true,
+        "details": {
+          "visible_names": [
+            "\u041f\u0440\u0430\u043a\u0442\u0438\u043a\u0430",
+            "\u041f\u043e\u0432\u0442\u043e\u0440\u0435\u043d\u0438\u0435"
+          ],
+          "progress": "25%"
+        }
+      },
+      {
+        "name": "T4",
+        "passed": true,
+        "details": {
+          "blank_title_error": true,
+          "preserved_title": true,
+          "empty_hours_error": true,
+          "preserved_hours": true,
+          "negative_error": true,
+          "no_invalid_additions": true,
+          "0.5_accepted": true,
+          "0.7_rejected": true,
+          "24_accepted": true
+        }
+      },
+      {
+        "name": "T5",
+        "passed": true,
+        "details": {
+          "total": "0 h",
+          "completed": "0 h",
+          "progress": "0%",
+          "empty_visible": true
+        }
+      },
+      {
+        "name": "Responsive 390px",
+        "passed": true,
+        "details": {
+          "dimensions": {
+            "viewport": 390,
+            "scroll": 390,
+            "body": 390
+          },
+          "no_horizontal_overflow": true
+        }
+      }
+    ],
+    "page_errors": []
+  }
+}
